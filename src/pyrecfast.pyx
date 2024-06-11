@@ -10,6 +10,7 @@ cdef extern:
                    double *Yp,
                    int *H_switch,
                    int *He_switch,
+                   int *cubicswitch,
                    double *z_initial,
                    double *z_final,
                    double *tol,
@@ -25,6 +26,7 @@ def recfast(double Omega_b,
             double Yp,
             int H_switch=1,
             int He_switch=6,
+            int cubicswitch=0,
             double z_initial=10000,
             double z_final=0,
             double tol=1e-5,
@@ -73,8 +75,14 @@ def recfast(double Omega_b,
                 (3) include Heswitch (1) and include triplet effects
                 (4) include Heswitch (1) and (3) and include H continuum effects
                 (5) include Heswitch (1) to (3)
-                (6: include Heswitch (1) to (4)
+                (6) include Heswitch (1) to (4)
             default: 6
+        
+        cubicswitch: int
+            Integer switch for toggling cubic initial condition.
+                (0) no
+                (1) yes
+            default: 0
 
         z_initial: float
             Initial redshift value.
@@ -115,6 +123,7 @@ def recfast(double Omega_b,
               &Yp,
               &H_switch,
               &He_switch,
+              &cubicswitch,
               &z_initial,
               &z_final,
               &tol,

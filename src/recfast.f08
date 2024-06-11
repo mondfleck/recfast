@@ -297,18 +297,76 @@ end module input
 
 !##############################################################################
 module recfast_module
-    use precision, only : dp
-    use constants, only : pi, c, G, a, parsec, m_1H, not4, CB1_H, CB1_He1, CB1_He2, CR
+    use precision, only : dp, qp
+    use constants, only : pi, c, G, a, m_e, k_B, h_P, parsec, m_1H, not4, CB1_H, CB1_He1, CB1_He2, CR
     use fudgefit, only : set_switch
-    use input, only : set_input
+    use input, only : Nnow, set_input
     implicit none
     contains
 
-    subroutine recfast_func(OmegaB, OmegaC, OmegaL_in, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, &
+    function cubic_solver(fHe, Tnow, z_new)
+        implicit none
+        real(dp) :: cubic_solver
+        real(dp), intent(in) :: fHe
+        real(dp), intent(in) :: Tnow
+        real(dp), intent(in) :: z_new
+
+        real(dp) :: Nz
+        real(dp) :: Tz
+        real(dp) :: dbwv
+        real(dp) :: chi_H
+        real(dp) :: chi_He
+        real(dp) :: R_H
+        real(dp) :: R_He
+
+        real(dp) :: b_t
+        real(dp) :: c_t
+        real(dp) :: d_t
+        real(dp) :: disc
+        real(dp) :: t1
+        real(dp) :: t2
+        real(dp) :: rs
+        real(dp) :: thetas
+        real(dp) :: s
+        real(dp) :: s1 
+        real(dp) :: output
+
+        chi_H = -2.17871122E-18 
+        chi_He = -3.9393393E-18
+        Tz = Tnow * (1._dp + z_new)
+        Nz = Nnow * (1._dp + z_new) ** 3
+        dbwv = (2._dp * pi * m_e * k_B * Tz) ** (1.5) / (Nz * h_P ** 3._dp)
+        R_H = dbwv * exp(chi_H / (k_B * Tz))
+        R_He = dbwv * exp(chi_He / (k_B * Tz))
+
+        b_t = R_H + R_He
+        c_t = R_H * R_He - R_H - R_He * fHe
+        d_t = -R_H * R_He * (1._dp + fHe)
+
+        disc = 4._dp * b_t**3._dp * d_t - b_t**2._dp * c_t**2._dp - 18._dp * b_t * c_t * d_t + 4._dp * c_t**3._dp + 27._dp * d_t**2._dp
+        t1 = -2._dp * b_t**3._dp + 9._dp * b_t * c_t - 27._dp * d_t
+        t2 = 3._dp * sqrt(-3._dp * disc)
+        
+        rs = sqrt(t1 ** 2._dp + t2 ** 2._dp) / 2._dp
+        thetas = atan2(t2, t1)
+        
+        rs = rs ** (1._dp / 3._dp)
+        thetas = thetas / 3._dp
+        
+        s1 = (3._dp * c_t - b_t ** 2._dp) / rs
+        s = cos(thetas) * (rs - s1)
+        
+        output = (s - b_t) / 3._dp
+        cubic_solver = output
+        return
+    end function cubic_solver
+    
+    subroutine recfast_func(OmegaB, OmegaC, OmegaL_in, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, cubicswitch, &
                             zinitial, zfinal, tol, Nz, z_array, x_array)
         integer,  intent(in) :: Nz           ! number of output redshitf (integer)
         integer,  intent(in) :: Hswitch_in
         integer,  intent(in) :: Heswitch_in
+        integer,  intent(in) :: cubicswitch
         real(dp), intent(in) :: OmegaB
         real(dp), intent(in) :: OmegaC
         real(dp), intent(in) :: OmegaL_in
@@ -400,7 +458,11 @@ module recfast_module
             else if (z_new > 3500._dp) then
                 x_H0 = 1._dp
                 x_He0 = 1._dp
-                x0 = x_H0 + fHe * x_He0
+                if (cubicswitch == 1) then
+                    x0 = cubic_solver(fHe, Tnow, z_new)
+                else
+                    x0 = x_H0 + fHe * x_He0
+                end if
                 y(1) = x_H0
                 y(2) = x_He0
                 y(3) = Tnow * (1._dp + z_new)
@@ -447,7 +509,7 @@ program recfast
 !   --- Arguments
     integer, parameter :: Nz = 1000
     integer :: i  ! loop index (integer)
-    integer Heswitch_in, Hswitch_in
+    integer Heswitch_in, Hswitch_in, cubicswitch
 
     real(dp) :: tol
     real(dp) :: zinitial, zfinal
@@ -506,8 +568,15 @@ program recfast
     write(*,*) 'Enter the choice of modification for HeI (0-6):'
     read(*,*) Heswitch_in
 
+    ! Toggle cubic initial condition
+    write(*,*) 'Toggle cubic initial condition:'
+    write(*,*) '0) no'
+    write(*,*) '1) yes'
+    write(*,*) 'Enter the choice for using cubic initial conditions (0-6):'
+    read(*,*) cubicswitch
+
     ! OK that's the initial conditions, now start writing output file
-    call recfast_func(OmegaB, OmegaC, OmegaL, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, &
+    call recfast_func(OmegaB, OmegaC, OmegaL, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, cubicswitch, &
                       zinitial, zfinal, tol, Nz, z_array, x_array)
 
     open(unit=7, status='new', form='formatted', file=fileout)
