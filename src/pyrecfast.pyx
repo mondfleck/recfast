@@ -16,7 +16,8 @@ cdef extern:
                    double *tol,
                    int *Nz,
                    double *z_array,
-                   double *x_array)
+                   double *x_array,
+                   int *flag_array)
 
 def recfast(double Omega_b,
             double Omega_c,
@@ -112,10 +113,15 @@ def recfast(double Omega_b,
         x_array: np.ndarray
             Array of ionisation fraction `x_e(z)`.
             Same shape as `z_array`.
+        
+        flag_array: np.ndarray
+            Array of flags for each z in recfast
+            Same shape as `z_array`
     """
     cdef:
         ndarray[double, mode="c"] z_array = np.empty(Nz, dtype=np.double)
         ndarray[double, mode="c"] x_array = np.empty(Nz, dtype=np.double)
+        ndarray[int, mode="c"] flag_array = np.empty(Nz, dtype=np.int32)
     recfast_c(&Omega_b,
               &Omega_c,
               &Omega_L,
@@ -130,5 +136,6 @@ def recfast(double Omega_b,
               &tol,
               &Nz,
               &z_array[0],
-              &x_array[0])
-    return z_array, x_array
+              &x_array[0],
+              &flag_array[0])
+    return z_array, x_array, flag_array

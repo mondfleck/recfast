@@ -337,7 +337,7 @@ module recfast_module
     end function cubic_solver
     
     subroutine recfast_func(OmegaB, OmegaC, OmegaL_in, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, cubicswitch, &
-                            zinitial, zfinal, tol, Nz, z_array, x_array)
+                            zinitial, zfinal, tol, Nz, z_array, x_array, flag_array)
         integer,  intent(in) :: Nz           ! number of output redshift (integer)
         integer,  intent(in) :: Hswitch_in
         integer,  intent(in) :: Heswitch_in
@@ -351,6 +351,7 @@ module recfast_module
         real(dp), intent(in) :: zinitial  ! starting redshift
         real(dp), intent(in) :: zfinal    ! ending redshift
         real(dp), intent(in) :: tol       ! tolerance for the integrator
+        integer, intent(out) :: flag_array(Nz)
         real(dp), intent(out) :: z_array(Nz)
         real(dp), intent(out) :: x_array(Nz)
 
@@ -422,6 +423,7 @@ module recfast_module
                 y(1) = x_H0
                 y(2) = x_He0
                 y(3) = Tnow * (1._dp + z_new)
+                flag_array(i) = 0
             else if (z_new > 5000._dp) then
                 x_H0 = 1._dp
                 x_He0 = 1._dp
@@ -431,6 +433,7 @@ module recfast_module
                 y(1) = x_H0
                 y(2) = x_He0
                 y(3) = Tnow * (1._dp + z_new)
+                flag_array(i) = 1
             else if ((y(2) > 0.99_dp .and. cubicswitch == 2) .or. (z_new > 3500._dp .and. cubicswitch == 1)) then
                 cs = cubic_solver(fHe, Tnow, z_new)
                 x0 = cs(1)
@@ -439,6 +442,7 @@ module recfast_module
                 y(1) = x_H0
                 y(2) = x_He0
                 y(3) = Tnow * (1._dp + z_new)
+                flag_array(i) = 2
             else if (z_new > 3500._dp) then
                 x_H0 = 1._dp
                 x_He0 = 1._dp
@@ -446,6 +450,7 @@ module recfast_module
                 y(1) = x_H0
                 y(2) = x_He0
                 y(3) = Tnow * (1._dp + z_new)
+                flag_array(i) = 3
             else if (y(2) > 0.99_dp) then
                 x_H0 = 1._dp
                 rhs = exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_He1 / (Tnow * (1._dp + z_new))) / Nnow
@@ -455,15 +460,18 @@ module recfast_module
                 y(1) = x_H0
                 y(2) = x_He0
                 y(3) = Tnow * (1._dp + z_new)
+                flag_array(i) = 4
             else if (y(1) > 0.99_dp) then
                 rhs = exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_H / (Tnow * (1._dp + z_new))) / Nnow
                 x_H0 = 0.5_dp * (sqrt( rhs**2 + 4._dp * rhs ) - rhs )
                 call dverk(nw, ion, z_old, y, z_new, tol, ind, cw, nw, w)
                 y(1) = x_H0
                 x0 = y(1) + fHe * y(2)
+                flag_array(i) = 5
             else
                 call dverk(nw, ion, z_old, y, z_new, tol, ind, cw, nw, w)
                 x0 = y(1) + fHe * y(2)
+                flag_array(i) = 6
             end if
             
             Trad = Tnow * (1._dp + z_new)  ! Trad and Tmat are radiation and matter temperatures
@@ -497,6 +505,7 @@ program recfast
 
     real(dp) :: z_array(Nz)  ! array of redshifts written to file in the end
     real(dp) :: x_array(Nz)  ! array of ionised fraction written to file in the end
+    integer :: flag_array(Nz) 
 
     character(len=80) :: fileout
 
@@ -556,12 +565,12 @@ program recfast
 
     ! OK that's the initial conditions, now start writing output file
     call recfast_func(OmegaB, OmegaC, OmegaL, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, cubicswitch, &
-                      zinitial, zfinal, tol, Nz, z_array, x_array)
+                      zinitial, zfinal, tol, Nz, z_array, x_array, flag_array)
 
     open(unit=7, status='new', form='formatted', file=fileout)
-    write(7, '(''#'', 1x,''z'', 2x, ''x_e'')')
+    write(7, '(''#'', 1x,''z'', 2x, ''x_e'', 3x, ''flag'')')
     do i = 1, Nz
-        write(7, '(f9.2,2x,e24.18)') z_array(i), x_array(i)
+        write(7, '(f9.2,2x,e24.18)') z_array(i), x_array(i), flag_array(i)
     end do
 
 end program recfast

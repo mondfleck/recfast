@@ -6,7 +6,7 @@ module recfast_wrapper
     contains
 
         subroutine recfast_c(Omega_b, Omega_c, Omega_L, H0, T_CMB, Yp, H_switch, He_switch, cubicswitch, &
-                             z_initial, z_final, tol, Nz, z_array, x_array) bind(c)
+                             z_initial, z_final, tol, Nz, z_array, x_array, flag_array) bind(c)
         real(c_double), intent(in) :: Omega_b
         real(c_double), intent(in) :: Omega_c
         real(c_double), intent(in) :: Omega_L
@@ -22,8 +22,9 @@ module recfast_wrapper
         integer(c_int), intent(in) :: Nz
         real(c_double), intent(out) :: z_array(Nz)
         real(c_double), intent(out) :: x_array(Nz)
+        integer(c_int), intent(out) :: flag_array(Nz)
         call recfast_func(Omega_b, Omega_c, Omega_L, H0, T_CMB, Yp, H_switch, He_switch, cubicswitch, &
-                          z_initial, z_final, tol, Nz, z_array, x_array)
+                          z_initial, z_final, tol, Nz, z_array, x_array, flag_array)
     end subroutine recfast_c
 end module recfast_wrapper
 
