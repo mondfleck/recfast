@@ -4246,7 +4246,7 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_9pyrecfast_recfast, "\n    Recfast: Integrator for Cosmic Recombination of Hydrogen and Helium.\n\n    Calculate ionised fraction as a function of redshift. Solves for H and He\n    simultaneously, and includes H \"fudge factor\" for low z effect, as well as\n    HeI fudge factor.\n\n\n    Parameters\n    ----------\n        Omega_b: float\n            Baryon density parameter.\n\n        Omega_c: float\n            Cold dark matter density parameter.\n\n        Omega_L: float\n            Dark energy density parameter.\n\n        H0: float\n            Hubble parameter in km/s/Mpc.\n\n        T_CMB: float\n            Present-day CMB temperature in K.\n\n        Yp: float\n            Present-day Helium fraction.\n\n        H_switch: int\n            Integer switch for modifying the H recombination.\n                (0) no change from old Recfast, fudge factor `fu=1.14`\n                (1) include correction,         fudge factor `fu=1.125`\n            default: 1\n\n        He_switch: int\n            Integer switch for modifying the HeI recombination.\n                (0) use Peebles coeff. for He\n                    (no change from old Recfast)\n                (1) for Heswitch > (0) use Sobolev escape probability for singlet 1P-1S transition\n                (2) include Heswitch (1) and use fitting formula for continuum opacity of H on HeI\n                    (based on fitting formula by Kholupenko, Ivanchik & Varshalovich, 2007)\n                (3) include Heswitch (1) and include triplet effects\n                (4) include Heswitch (1) and (3) and include H continuum effects\n                (5) include Heswitch (1) to (3)\n                (6) include Heswitch (1) to (4)\n            default: 6\n        \n        cubicswitch: int\n            Integer switch for toggling cubic initial condition.\n                (0) no\n                (1) yes\n            default: 0\n\n        z_initial: float\n            Initial redshift value.\n            default: 10000\n\n        z_fina""l: float\n            Final redshift value.\n            default: 0 (today)\n\n        tol: float\n            Tolerance for numerical integrator.\n            default: 1e-5\n\n        Nz: int\n            Number or redshift bins between `zinitial` and `zfinal`.\n            Determines the size of the returned arrays.\n            default: 1000\n\n\n    Returns\n    -------\n        z_array: np.ndarray\n            Array of redshift values `z`.\n            Same shape as `x_array`.\n\n        x_array: np.ndarray\n            Array of ionisation fraction `x_e(z)`.\n            Same shape as `z_array`.\n    ");
+PyDoc_STRVAR(__pyx_doc_9pyrecfast_recfast, "\n    Recfast: Integrator for Cosmic Recombination of Hydrogen and Helium.\n\n    Calculate ionised fraction as a function of redshift. Solves for H and He\n    simultaneously, and includes H \"fudge factor\" for low z effect, as well as\n    HeI fudge factor.\n\n\n    Parameters\n    ----------\n        Omega_b: float\n            Baryon density parameter.\n\n        Omega_c: float\n            Cold dark matter density parameter.\n\n        Omega_L: float\n            Dark energy density parameter.\n\n        H0: float\n            Hubble parameter in km/s/Mpc.\n\n        T_CMB: float\n            Present-day CMB temperature in K.\n\n        Yp: float\n            Present-day Helium fraction.\n\n        H_switch: int\n            Integer switch for modifying the H recombination.\n                (0) no change from old Recfast, fudge factor `fu=1.14`\n                (1) include correction,         fudge factor `fu=1.125`\n            default: 1\n\n        He_switch: int\n            Integer switch for modifying the HeI recombination.\n                (0) use Peebles coeff. for He\n                    (no change from old Recfast)\n                (1) for Heswitch > (0) use Sobolev escape probability for singlet 1P-1S transition\n                (2) include Heswitch (1) and use fitting formula for continuum opacity of H on HeI\n                    (based on fitting formula by Kholupenko, Ivanchik & Varshalovich, 2007)\n                (3) include Heswitch (1) and include triplet effects\n                (4) include Heswitch (1) and (3) and include H continuum effects\n                (5) include Heswitch (1) to (3)\n                (6) include Heswitch (1) to (4)\n            default: 6\n        \n        cubicswitch: int\n            Integer switch for toggling cubic initial condition.\n                (0) no\n                (1) yes for 3500 < z < 5000 only\n                (2) yes for z < 5000 and y(2) > 0.99\n            default: 0\n\n        z_initial: float""\n            Initial redshift value.\n            default: 10000\n\n        z_final: float\n            Final redshift value.\n            default: 0 (today)\n\n        tol: float\n            Tolerance for numerical integrator.\n            default: 1e-5\n\n        Nz: int\n            Number or redshift bins between `zinitial` and `zfinal`.\n            Determines the size of the returned arrays.\n            default: 1000\n\n\n    Returns\n    -------\n        z_array: np.ndarray\n            Array of redshift values `z`.\n            Same shape as `x_array`.\n\n        x_array: np.ndarray\n            Array of ionisation fraction `x_e(z)`.\n            Same shape as `z_array`.\n    ");
 static PyMethodDef __pyx_mdef_9pyrecfast_1recfast = {"recfast", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_9pyrecfast_1recfast, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_9pyrecfast_recfast};
 static PyObject *__pyx_pw_9pyrecfast_1recfast(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
@@ -4563,46 +4563,46 @@ static PyObject *__pyx_pf_9pyrecfast_recfast(CYTHON_UNUSED PyObject *__pyx_self,
   __pyx_pybuffernd_x_array.data = NULL;
   __pyx_pybuffernd_x_array.rcbuffer = &__pyx_pybuffer_x_array;
 
-  /* "pyrecfast.pyx":116
+  /* "pyrecfast.pyx":117
  *     """
  *     cdef:
  *         ndarray[double, mode="c"] z_array = np.empty(Nz, dtype=np.double)             # <<<<<<<<<<<<<<
  *         ndarray[double, mode="c"] x_array = np.empty(Nz, dtype=np.double)
  *     recfast_c(&Omega_b,
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 116, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 116, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_Nz); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 116, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_Nz); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 116, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1)) __PYX_ERR(1, 116, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1)) __PYX_ERR(1, 117, __pyx_L1_error);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 116, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 116, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_double); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 116, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_double); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(1, 116, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(1, 117, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 116, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 116, __pyx_L1_error)
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 117, __pyx_L1_error)
   __pyx_t_6 = ((PyArrayObject *)__pyx_t_5);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_z_array.rcbuffer->pybuffer, (PyObject*)__pyx_t_6, &__Pyx_TypeInfo_double, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_z_array = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_z_array.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(1, 116, __pyx_L1_error)
+      __PYX_ERR(1, 117, __pyx_L1_error)
     } else {__pyx_pybuffernd_z_array.diminfo[0].strides = __pyx_pybuffernd_z_array.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_z_array.diminfo[0].shape = __pyx_pybuffernd_z_array.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -4610,46 +4610,46 @@ static PyObject *__pyx_pf_9pyrecfast_recfast(CYTHON_UNUSED PyObject *__pyx_self,
   __pyx_v_z_array = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "pyrecfast.pyx":117
+  /* "pyrecfast.pyx":118
  *     cdef:
  *         ndarray[double, mode="c"] z_array = np.empty(Nz, dtype=np.double)
  *         ndarray[double, mode="c"] x_array = np.empty(Nz, dtype=np.double)             # <<<<<<<<<<<<<<
  *     recfast_c(&Omega_b,
  *               &Omega_c,
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 117, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_empty); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 117, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_empty); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_Nz); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 117, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_Nz); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 117, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_5);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5)) __PYX_ERR(1, 117, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5)) __PYX_ERR(1, 118, __pyx_L1_error);
   __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 117, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 117, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_double); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 117, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_double); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 117, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 118, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 117, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 117, __pyx_L1_error)
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(1, 118, __pyx_L1_error)
   __pyx_t_7 = ((PyArrayObject *)__pyx_t_4);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_x_array.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_double, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_x_array = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_x_array.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(1, 117, __pyx_L1_error)
+      __PYX_ERR(1, 118, __pyx_L1_error)
     } else {__pyx_pybuffernd_x_array.diminfo[0].strides = __pyx_pybuffernd_x_array.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_x_array.diminfo[0].shape = __pyx_pybuffernd_x_array.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -4657,7 +4657,7 @@ static PyObject *__pyx_pf_9pyrecfast_recfast(CYTHON_UNUSED PyObject *__pyx_self,
   __pyx_v_x_array = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "pyrecfast.pyx":131
+  /* "pyrecfast.pyx":132
  *               &tol,
  *               &Nz,
  *               &z_array[0],             # <<<<<<<<<<<<<<
@@ -4672,10 +4672,10 @@ static PyObject *__pyx_pf_9pyrecfast_recfast(CYTHON_UNUSED PyObject *__pyx_self,
   } else if (unlikely(__pyx_t_8 >= __pyx_pybuffernd_z_array.diminfo[0].shape)) __pyx_t_9 = 0;
   if (unlikely(__pyx_t_9 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_9);
-    __PYX_ERR(1, 131, __pyx_L1_error)
+    __PYX_ERR(1, 132, __pyx_L1_error)
   }
 
-  /* "pyrecfast.pyx":132
+  /* "pyrecfast.pyx":133
  *               &Nz,
  *               &z_array[0],
  *               &x_array[0])             # <<<<<<<<<<<<<<
@@ -4689,10 +4689,10 @@ static PyObject *__pyx_pf_9pyrecfast_recfast(CYTHON_UNUSED PyObject *__pyx_self,
   } else if (unlikely(__pyx_t_10 >= __pyx_pybuffernd_x_array.diminfo[0].shape)) __pyx_t_9 = 0;
   if (unlikely(__pyx_t_9 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_9);
-    __PYX_ERR(1, 132, __pyx_L1_error)
+    __PYX_ERR(1, 133, __pyx_L1_error)
   }
 
-  /* "pyrecfast.pyx":118
+  /* "pyrecfast.pyx":119
  *         ndarray[double, mode="c"] z_array = np.empty(Nz, dtype=np.double)
  *         ndarray[double, mode="c"] x_array = np.empty(Nz, dtype=np.double)
  *     recfast_c(&Omega_b,             # <<<<<<<<<<<<<<
@@ -4701,20 +4701,20 @@ static PyObject *__pyx_pf_9pyrecfast_recfast(CYTHON_UNUSED PyObject *__pyx_self,
  */
   recfast_c((&__pyx_v_Omega_b), (&__pyx_v_Omega_c), (&__pyx_v_Omega_L), (&__pyx_v_H0), (&__pyx_v_T_CMB), (&__pyx_v_Yp), (&__pyx_v_H_switch), (&__pyx_v_He_switch), (&__pyx_v_cubicswitch), (&__pyx_v_z_initial), (&__pyx_v_z_final), (&__pyx_v_tol), (&__pyx_v_Nz), (&(*__Pyx_BufPtrCContig1d(double *, __pyx_pybuffernd_z_array.rcbuffer->pybuffer.buf, __pyx_t_8, __pyx_pybuffernd_z_array.diminfo[0].strides))), (&(*__Pyx_BufPtrCContig1d(double *, __pyx_pybuffernd_x_array.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_x_array.diminfo[0].strides))));
 
-  /* "pyrecfast.pyx":133
+  /* "pyrecfast.pyx":134
  *               &z_array[0],
  *               &x_array[0])
  *     return z_array, x_array             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 133, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF((PyObject *)__pyx_v_z_array);
   __Pyx_GIVEREF((PyObject *)__pyx_v_z_array);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, ((PyObject *)__pyx_v_z_array))) __PYX_ERR(1, 133, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, ((PyObject *)__pyx_v_z_array))) __PYX_ERR(1, 134, __pyx_L1_error);
   __Pyx_INCREF((PyObject *)__pyx_v_x_array);
   __Pyx_GIVEREF((PyObject *)__pyx_v_x_array);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, ((PyObject *)__pyx_v_x_array))) __PYX_ERR(1, 133, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, ((PyObject *)__pyx_v_x_array))) __PYX_ERR(1, 134, __pyx_L1_error);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;

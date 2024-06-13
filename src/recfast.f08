@@ -298,7 +298,7 @@ end module input
 !##############################################################################
 module recfast_module
     use precision, only : dp, qp
-    use constants, only : pi, c, G, a, m_e, k_B, h_P, parsec, m_1H, not4, CB1_H, CB1_He1, CB1_He2, CR
+    use constants, only : pi, c, G, a, parsec, m_1H, not4, CB1_H, CB1_He1, CB1_He2, CR
     use fudgefit, only : set_switch
     use input, only : Nnow, set_input
     implicit none
@@ -306,64 +306,39 @@ module recfast_module
 
     function cubic_solver(fHe, Tnow, z_new)
         implicit none
-        real(dp) :: cubic_solver
-        real(dp), intent(in) :: fHe
-        real(dp), intent(in) :: Tnow
-        real(dp), intent(in) :: z_new
+        real(dp) :: cubic_solver(3)
+        real(dp), intent(in) :: fHe, Tnow, z_new
+        ! Variables to help with computing cubic equation solution
+        real(dp) :: R_H, R_He, b, c, d, disc, t1, t2, rs, thetas, s, s1
 
-        real(dp) :: Nz
-        real(dp) :: Tz
-        real(dp) :: dbwv
-        real(dp) :: chi_H
-        real(dp) :: chi_He
-        real(dp) :: R_H
-        real(dp) :: R_He
+        ! ratio of g's are 1 for H+ <-> H0 and 4 for He+ <-> He0 respectively
+        R_H = 1._dp * exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_H / (Tnow * (1._dp + z_new))) / Nnow
+        R_He = 4._dp * exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_He1 / (Tnow * (1._dp + z_new))) / Nnow
 
-        real(dp) :: b_t
-        real(dp) :: c_t
-        real(dp) :: d_t
-        real(dp) :: disc
-        real(dp) :: t1
-        real(dp) :: t2
-        real(dp) :: rs
-        real(dp) :: thetas
-        real(dp) :: s
-        real(dp) :: s1 
-        real(dp) :: output
+        b = R_H + R_He
+        c = R_H * R_He - R_H - R_He * fHe
+        d = -R_H * R_He * (1._dp + fHe)
 
-        chi_H = -2.17871122E-18 
-        chi_He = -3.9393393E-18
-        Tz = Tnow * (1._dp + z_new)
-        Nz = Nnow * (1._dp + z_new) ** 3
-        dbwv = (2._dp * pi * m_e * k_B * Tz) ** (1.5) / (Nz * h_P ** 3._dp)
-        R_H = dbwv * exp(chi_H / (k_B * Tz))
-        R_He = dbwv * exp(chi_He / (k_B * Tz))
-
-        b_t = R_H + R_He
-        c_t = R_H * R_He - R_H - R_He * fHe
-        d_t = -R_H * R_He * (1._dp + fHe)
-
-        disc = 4._dp * b_t**3._dp * d_t - b_t**2._dp * c_t**2._dp - 18._dp * b_t * c_t * d_t + 4._dp * c_t**3._dp + 27._dp * d_t**2._dp
-        t1 = -2._dp * b_t**3._dp + 9._dp * b_t * c_t - 27._dp * d_t
-        t2 = 3._dp * sqrt(-3._dp * disc)
+        disc = 4._dp * b**3._dp * d - b**2._dp * c**2._dp - 18._dp * b * c * d + 4._dp * c**3._dp + 27._dp * d**2._dp
+        t1 = -2._dp * b**3._dp + 9._dp * b * c - 27._dp * d
+        t2 = 3._dp * exp(0.5_dp * log(-3._dp * disc))
         
-        rs = sqrt(t1 ** 2._dp + t2 ** 2._dp) / 2._dp
-        thetas = atan2(t2, t1)
+        rs = exp(1 / 6._dp * (log(t1**2._dp + t2**2._dp) - 2._dp * log(2._dp)))
+        thetas = atan2(t2, t1) / 3._dp
         
-        rs = rs ** (1._dp / 3._dp)
-        thetas = thetas / 3._dp
-        
-        s1 = (3._dp * c_t - b_t ** 2._dp) / rs
+        s1 = (3._dp * c - b**2._dp) / rs
         s = cos(thetas) * (rs - s1)
         
-        output = (s - b_t) / 3._dp
-        cubic_solver = output
+        cubic_solver(1) = (s - b) / 3._dp
+        ! Storing these helps in recfast_func
+        cubic_solver(2) = R_H
+        cubic_solver(3) = R_He
         return
     end function cubic_solver
     
     subroutine recfast_func(OmegaB, OmegaC, OmegaL_in, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, cubicswitch, &
                             zinitial, zfinal, tol, Nz, z_array, x_array)
-        integer,  intent(in) :: Nz           ! number of output redshitf (integer)
+        integer,  intent(in) :: Nz           ! number of output redshift (integer)
         integer,  intent(in) :: Hswitch_in
         integer,  intent(in) :: Heswitch_in
         integer,  intent(in) :: cubicswitch
@@ -390,6 +365,7 @@ module recfast_module
         real(dp) :: w0, w1, logw0, logw1, hw
         real(dp) :: z_old, z_new  ! z_old and z_new are for each pass to the integrator
         real(dp) :: rhs           ! rhs is dummy for calculating x0
+        real(dp) :: cs(3)         ! variable to store the output of cubic_solver
         real(dp) :: x_H, x_He
 
         real(dp) :: cw(24)      ! cw(24), w(3,9): work space for dverk
@@ -455,14 +431,18 @@ module recfast_module
                 y(1) = x_H0
                 y(2) = x_He0
                 y(3) = Tnow * (1._dp + z_new)
+            else if ((y(2) > 0.99_dp .and. cubicswitch == 2) .or. (z_new > 3500._dp .and. cubicswitch == 1)) then
+                cs = cubic_solver(fHe, Tnow, z_new)
+                x0 = cs(1)
+                x_H0 = cs(2) / (x0 + cs(2))
+                x_He0 = cs(3) / (x0 + cs(3))
+                y(1) = x_H0
+                y(2) = x_He0
+                y(3) = Tnow * (1._dp + z_new)
             else if (z_new > 3500._dp) then
                 x_H0 = 1._dp
                 x_He0 = 1._dp
-                if (cubicswitch == 1) then
-                    x0 = cubic_solver(fHe, Tnow, z_new)
-                else
-                    x0 = x_H0 + fHe * x_He0
-                end if
+                x0 = x_H0 + fHe * x_He0
                 y(1) = x_H0
                 y(2) = x_He0
                 y(3) = Tnow * (1._dp + z_new)
@@ -470,8 +450,7 @@ module recfast_module
                 x_H0 = 1._dp
                 rhs = exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_He1 / (Tnow * (1._dp + z_new))) / Nnow
                 rhs = rhs * 4._dp      !ratio of g's is 4 for He+ <-> He0
-                x_He0 = 0.5_dp * (sqrt( (rhs - 1._dp)**2 + 4._dp * (1._dp + fHe) * rhs ) - (rhs - 1._dp))
-                x0 = x_He0
+                x0 = 0.5_dp * (sqrt( (rhs - 1._dp)**2 + 4._dp * (1._dp + fHe) * rhs ) - (rhs - 1._dp))
                 x_He0 = (x0 - 1._dp) / fHe
                 y(1) = x_H0
                 y(2) = x_He0
@@ -486,7 +465,7 @@ module recfast_module
                 call dverk(nw, ion, z_old, y, z_new, tol, ind, cw, nw, w)
                 x0 = y(1) + fHe * y(2)
             end if
-
+            
             Trad = Tnow * (1._dp + z_new)  ! Trad and Tmat are radiation and matter temperatures
             x_H = y(1)   ! ionised fraction of H  - y(1) in R-K routine
             x_He = y(2)  ! ionised fraction of He - y(2) in R-K routine, (note that x_He=n_He+/n_He here and not n_He+/n_H)
@@ -618,8 +597,7 @@ subroutine get_init(z, x_H0, x_He0, x0)
         x_H0 = 1._dp
         rhs = exp(1.5_dp * log(CR * Tnow / (1._dp + z)) - CB1_He1 / (Tnow * (1._dp + z))) / Nnow
         rhs = rhs * 4._dp      !ratio of g's is 4 for He+ <-> He0
-        x_He0 = 0.5_dp * (sqrt((rhs - 1._dp)**2 + 4._dp * (1._dp + fHe) * rhs) - (rhs - 1._dp))
-        x0 = x_He0
+        x0 = 0.5_dp * (sqrt((rhs - 1._dp)**2 + 4._dp * (1._dp + fHe) * rhs) - (rhs - 1._dp))
         x_He0 = (x0 - 1._dp) / fHe
     else
         rhs = exp(1.5_dp * log(CR * Tnow / (1._dp + z)) - CB1_H / (Tnow * (1._dp + z))) / Nnow

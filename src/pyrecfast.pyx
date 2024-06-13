@@ -81,7 +81,8 @@ def recfast(double Omega_b,
         cubicswitch: int
             Integer switch for toggling cubic initial condition.
                 (0) no
-                (1) yes
+                (1) yes for 3500 < z < 5000 only
+                (2) yes for z < 5000 and y(2) > 0.99
             default: 0
 
         z_initial: float
