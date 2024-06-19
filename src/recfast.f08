@@ -309,30 +309,32 @@ module recfast_module
         real(dp) :: cubic_solver(3)
         real(dp), intent(in) :: fHe, Tnow, z_new
         ! Variables to help with computing cubic equation solution
-        real(dp) :: R_H, R_He, b, c, d, disc, t1, t2, rs, thetas, s, s1
+        real(qp) :: R_H, R_He, fHe_1, b, c, d, disc, t1, t2, rs, thetas, s, s1
 
         ! ratio of g's are 1 for H+ <-> H0 and 4 for He+ <-> He0 respectively
-        R_H = 1._dp * exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_H / (Tnow * (1._dp + z_new))) / Nnow
-        R_He = 4._dp * exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_He1 / (Tnow * (1._dp + z_new))) / Nnow
+        R_H = 1._qp * exp(1.5_qp * log(CR * Tnow / (1._qp + z_new)) - CB1_H / (Tnow * (1._qp + z_new))) / Nnow
+        R_He = 4._qp * exp(1.5_qp * log(CR * Tnow / (1._qp + z_new)) - CB1_He1 / (Tnow * (1._qp + z_new))) / Nnow
+        fHe_1 = real(fHe, kind = qp)
 
         b = R_H + R_He
-        c = R_H * R_He - R_H - R_He * fHe
-        d = -R_H * R_He * (1._dp + fHe)
+        c = R_H * R_He - R_H - R_He * fHe_1
+        d = -R_H * R_He * (1._qp + fHe_1)
 
-        disc = 4._dp * b**3._dp * d - b**2._dp * c**2._dp - 18._dp * b * c * d + 4._dp * c**3._dp + 27._dp * d**2._dp
-        t1 = -2._dp * b**3._dp + 9._dp * b * c - 27._dp * d
-        t2 = 3._dp * exp(0.5_dp * log(-3._dp * disc))
+        disc = 4._qp * b**3._qp * d - b**2._qp * c**2._qp - 18._qp * b * c * d + 4._qp * c**3._qp + 27._qp * d**2._qp
+        t1 = -2._qp * b**3._qp + 9._qp * b * c - 27._qp * d
+        t2 = 3._qp * exp(0.5_qp * log(-3._qp * disc))
         
-        rs = exp(1 / 6._dp * (log(t1**2._dp + t2**2._dp) - 2._dp * log(2._dp)))
-        thetas = atan2(t2, t1) / 3._dp
+        rs = exp(1 / 6._qp * (log(t1**2._qp + t2**2._qp) - 2._qp * log(2._qp)))
+        thetas = (pi - atan(-t2 / t1)) / 3._qp
         
-        s1 = (3._dp * c - b**2._dp) / rs
+        s1 = (3._qp * c - b**2._qp) / rs
         s = cos(thetas) * (rs - s1)
         
-        cubic_solver(1) = (s - b) / 3._dp
+        cubic_solver(1) = real((s - b) / 3._qp, kind = dp)
         ! Storing these helps in recfast_func
-        cubic_solver(2) = R_H
-        cubic_solver(3) = R_He
+        ! write(*,*) cubic_solver(1)
+        cubic_solver(2) = real(R_H, kind = dp)
+        cubic_solver(3) = real(R_He, kind = dp)
         return
     end function cubic_solver
     
@@ -424,7 +426,7 @@ module recfast_module
                 y(2) = x_He0
                 y(3) = Tnow * (1._dp + z_new)
                 flag_array(i) = 0
-            else if (z_new > 5000._dp) then
+            else if (z_new > 4850._dp) then
                 x_H0 = 1._dp
                 x_He0 = 1._dp
                 rhs = exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_He2 / (Tnow * (1._dp + z_new))) / Nnow
@@ -434,7 +436,7 @@ module recfast_module
                 y(2) = x_He0
                 y(3) = Tnow * (1._dp + z_new)
                 flag_array(i) = 1
-            else if ((y(2) > 0.99_dp .and. cubicswitch == 2) .or. (z_new > 3500._dp .and. cubicswitch == 1)) then
+            else if (((z_new > 3500._dp .or. y(2) > 0.99_dp) .and. cubicswitch == 2) .or. (z_new > 3500._dp .and. cubicswitch == 1)) then
                 cs = cubic_solver(fHe, Tnow, z_new)
                 x0 = cs(1)
                 x_H0 = cs(2) / (x0 + cs(2))
