@@ -325,14 +325,13 @@ module recfast_module
         t2 = 3._qp * exp(0.5_qp * log(-3._qp * disc))
         
         rs = exp(1 / 6._qp * (log(t1**2._qp + t2**2._qp) - 2._qp * log(2._qp)))
-        thetas = (pi - atan(-t2 / t1)) / 3._qp
+        thetas = atan2(t2, t1) / 3._qp
         
         s1 = (3._qp * c - b**2._qp) / rs
         s = cos(thetas) * (rs - s1)
         
         cubic_solver(1) = real((s - b) / 3._qp, kind = dp)
         ! Storing these helps in recfast_func
-        ! write(*,*) cubic_solver(1)
         cubic_solver(2) = real(R_H, kind = dp)
         cubic_solver(3) = real(R_He, kind = dp)
         return
