@@ -17,6 +17,24 @@ cdef extern:
                    double *z_array,
                    double *x_array)
 
+cdef extern:
+    void recfast_fudgeTest_c(double *Omega_b,
+                             double *Omega_c,
+                             double *Omega_L,
+                             double *H0,
+                             double *T_CMB,
+                             double *Yp,
+                             int *H_switch,
+                             int *He_switch,
+                             double *z_initial,
+                             double *z_final,
+                             double *tol,
+                             int *Nz,
+                             double *fu_in,
+                             double *bHe_in,
+                             double *z_array,
+                             double *x_array)
+
 def recfast(double Omega_b,
             double Omega_c,
             double Omega_L,
@@ -28,7 +46,9 @@ def recfast(double Omega_b,
             double z_initial=10000,
             double z_final=0,
             double tol=1e-5,
-            int Nz=1000):
+            int Nz=1000,
+            double fu=-1.0,
+            double bHe=-1.0):
     """
     Recfast: Integrator for Cosmic Recombination of Hydrogen and Helium.
 
@@ -93,6 +113,14 @@ def recfast(double Omega_b,
             Determines the size of the returned arrays.
             default: 1000
 
+        fu: float
+            Precise H fudge factor modification
+            default: -1 (no change)
+
+        bHe: float
+            Precise H fudge factor modification
+            default: -1 (no change)
+
 
     Returns
     -------
@@ -107,7 +135,7 @@ def recfast(double Omega_b,
     cdef:
         ndarray[double, mode="c"] z_array = np.empty(Nz, dtype=np.double)
         ndarray[double, mode="c"] x_array = np.empty(Nz, dtype=np.double)
-    recfast_c(&Omega_b,
+    recfast_fudgeTest_c(&Omega_b,
               &Omega_c,
               &Omega_L,
               &H0,
@@ -119,6 +147,8 @@ def recfast(double Omega_b,
               &z_final,
               &tol,
               &Nz,
+              &fu,
+              &bHe,
               &z_array[0],
               &x_array[0])
     return z_array, x_array
