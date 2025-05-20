@@ -14,26 +14,10 @@ cdef extern:
                    double *z_final,
                    double *tol,
                    int *Nz,
+                   double *fu_in,
+                   double *bHe_in,
                    double *z_array,
                    double *x_array)
-
-cdef extern:
-    void recfast_fudgeTest_c(double *Omega_b,
-                             double *Omega_c,
-                             double *Omega_L,
-                             double *H0,
-                             double *T_CMB,
-                             double *Yp,
-                             int *H_switch,
-                             int *He_switch,
-                             double *z_initial,
-                             double *z_final,
-                             double *tol,
-                             int *Nz,
-                             double *fu_in,
-                             double *bHe_in,
-                             double *z_array,
-                             double *x_array)
 
 def recfast(double Omega_b,
             double Omega_c,
@@ -135,7 +119,7 @@ def recfast(double Omega_b,
     cdef:
         ndarray[double, mode="c"] z_array = np.empty(Nz, dtype=np.double)
         ndarray[double, mode="c"] x_array = np.empty(Nz, dtype=np.double)
-    recfast_fudgeTest_c(&Omega_b,
+    recfast_c(&Omega_b,
               &Omega_c,
               &Omega_L,
               &H0,
