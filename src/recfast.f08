@@ -599,7 +599,7 @@ end module recfast_module
 !##############################################################################
 program recfast
     use precision, only : dp
-    use recfast_module, only : recfast_func
+    use recfast_module, only : recfast_func, recfast_func_fudgeTest
     implicit none
 
 !   --- Arguments
