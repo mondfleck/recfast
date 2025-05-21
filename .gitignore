@@ -1,6 +1,9 @@
 # Executable
 recfast
 
+# SLURM logs
+compare_lukas_douglas/debugging
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
