@@ -18,7 +18,7 @@ cdef extern:
                    double *x_array)
 
 cdef extern:
-    void recfast_fudgeTest_c(double *Omega_b,
+    void recfast_fudgetest_c(double *Omega_b,
                              double *Omega_c,
                              double *Omega_L,
                              double *H0,
@@ -35,7 +35,7 @@ cdef extern:
                              double *z_array,
                              double *x_array)
 
-def recfast_fudgeTest(double Omega_b,
+def recfast_fudgetest(double Omega_b,
             double Omega_c,
             double Omega_L,
             double H0,
@@ -135,7 +135,7 @@ def recfast_fudgeTest(double Omega_b,
     cdef:
         ndarray[double, mode="c"] z_array = np.empty(Nz, dtype=np.double)
         ndarray[double, mode="c"] x_array = np.empty(Nz, dtype=np.double)
-    recfast_fudgeTest_c(&Omega_b,
+    recfast_fudgetest_c(&Omega_b,
               &Omega_c,
               &Omega_L,
               &H0,

@@ -450,7 +450,7 @@ module recfast_module
         end do
     end subroutine recfast_func
 
-    subroutine recfast_fudgeTest_func(OmegaB, OmegaC, OmegaL_in, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, &
+    subroutine recfast_fudgetest_func(OmegaB, OmegaC, OmegaL_in, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, &
                             zinitial, zfinal, tol, Nz, fu_in, bHe_in, z_array, x_array)
         integer,  intent(in) :: Nz           ! number of output redshitf (integer)
         integer,  intent(in) :: Hswitch_in
@@ -592,14 +592,14 @@ module recfast_module
             x_array(i) = x0
 
         end do
-    end subroutine recfast_fudgeTest_func
+    end subroutine recfast_fudgetest_func
 end module recfast_module
 
 
 !##############################################################################
 program recfast
     use precision, only : dp
-    use recfast_module, only : recfast_func, recfast_fudgeTest_func
+    use recfast_module, only : recfast_func, recfast_fudgetest_func
     implicit none
 
 !   --- Arguments

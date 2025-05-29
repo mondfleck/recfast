@@ -1,3 +1,3 @@
 """Python wrapper for RECFAST."""
-from pyrecfast.pyrecfast import recfast, recfast_fudgeTest
+from pyrecfast.pyrecfast import recfast, recfast_fudgetest
 
