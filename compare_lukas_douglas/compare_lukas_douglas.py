@@ -1,4 +1,4 @@
-from pyrecfast import recfast as recfast1pt5
+from pyrecfast import recfast_fudgetest as recfast1pt5
 import numpy as np
 import os
 
