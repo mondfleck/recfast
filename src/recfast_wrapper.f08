@@ -1,6 +1,6 @@
 module recfast_wrapper
     use iso_c_binding, only: c_double, c_int
-    use recfast_module, only: recfast_func, recfast_func_fudgeTest
+    use recfast_module, only: recfast_func, recfast_fudgeTest_func
     implicit none
 
     contains
@@ -43,7 +43,7 @@ module recfast_wrapper
         real(c_double), intent(in) :: bHe_in
         real(c_double), intent(out) :: z_array(Nz)
         real(c_double), intent(out) :: x_array(Nz)
-        call recfast_func_fudgeTest(Omega_b, Omega_c, Omega_L, H0, T_CMB, Yp, H_switch, He_switch, &
+        call recfast_fudgeTest_func(Omega_b, Omega_c, Omega_L, H0, T_CMB, Yp, H_switch, He_switch, &
                           z_initial, z_final, tol, Nz, fu_in, bHe_in, z_array, x_array)
     end subroutine recfast_fudgeTest_c
 end module recfast_wrapper
