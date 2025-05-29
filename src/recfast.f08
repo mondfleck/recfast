@@ -233,6 +233,20 @@ module fudgefit
         !endif
         b_He = 0.86
     end subroutine set_switch
+
+    subroutine set_fu(fu_in)
+        real(dp), intent(in) :: fu_in
+
+        ! Fudge factor to approximate the low z out of equilibrium effect
+        fu = fu_in
+    end subroutine set_fu
+
+    subroutine set_b_He(b_He_in)
+        real(dp), intent(in) :: b_He_in
+
+        ! Fudge factor to approximate the low z out of equilibrium effect
+        b_He = b_He_in
+    end subroutine set_b_He
 end module fudgefit
 
 
@@ -299,7 +313,7 @@ end module input
 module recfast_module
     use precision, only : dp
     use constants, only : pi, c, G, a, parsec, m_1H, not4, CB1_H, CB1_He1, CB1_He2, CR
-    use fudgefit, only : set_switch
+    use fudgefit, only : set_switch, set_fu, set_b_He
     use input, only : set_input
     implicit none
     contains
@@ -435,13 +449,157 @@ module recfast_module
 
         end do
     end subroutine recfast_func
+
+    subroutine recfast_fudgetest_func(OmegaB, OmegaC, OmegaL_in, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, &
+                            zinitial, zfinal, tol, Nz, fu_in, bHe_in, z_array, x_array)
+        integer,  intent(in) :: Nz           ! number of output redshitf (integer)
+        integer,  intent(in) :: Hswitch_in
+        integer,  intent(in) :: Heswitch_in
+        real(dp), intent(in) :: OmegaB
+        real(dp), intent(in) :: OmegaC
+        real(dp), intent(in) :: OmegaL_in
+        real(dp), intent(in) :: H0_in
+        real(dp), intent(in) :: Tnow
+        real(dp), intent(in) :: Yp
+        real(dp), intent(in) :: zinitial  ! starting redshift
+        real(dp), intent(in) :: zfinal    ! ending redshift
+        real(dp), intent(in) :: tol       ! tolerance for the integrator
+        real(dp), intent(in) :: fu_in        ! Hydrogen fudge factor
+        real(dp), intent(in) :: bHe_in       ! Helium fudge factor
+        real(dp), intent(out) :: z_array(Nz)
+        real(dp), intent(out) :: x_array(Nz)
+
+        ! easiest way would be to modify fudgefit here somehow if that's even possible.
+
+        integer, parameter :: Ndim = 3  ! number of d.e.'s to solve (integer)
+
+        integer :: i              ! loop index (integer)
+        integer :: ind            ! ind, nw: work-space for dverk (integer)
+        integer :: nw             ! ind, nw: work-space for dverk (integer)
+        real(dp) :: Trad, Tmat
+        real(dp) :: x_H0, x_He0
+        real(dp) :: x0
+        real(dp) :: w0, w1, logw0, logw1, hw
+        real(dp) :: z_old, z_new  ! z_old and z_new are for each pass to the integrator
+        real(dp) :: rhs           ! rhs is dummy for calculating x0
+        real(dp) :: x_H, x_He
+
+        real(dp) :: cw(24)      ! cw(24), w(3,9): work space for dverk
+        real(dp) :: w(Ndim, 9)  ! cw(24), w(3,9): work space for dverk
+        real(dp) :: y(Ndim)
+
+        real(dp) :: Nnow
+        real(dp) :: fHe
+
+        external ion
+
+        call set_input(OmegaB, OmegaC, OmegaL_in, H0_in, Tnow, Yp, Nnow, fHe)
+
+        call set_switch(Hswitch_in, Heswitch_in)
+
+        if (fu_in >= 0.0_dp) then
+            call set_fu(fu_in)
+        end if
+
+        if (bHe_in >= 0.0_dp) then
+            call set_b_He(bHe_in)
+        end if
+
+        ! Set initial matter temperature
+        Tmat = Tnow * (1._dp + zinitial)  ! Initial rad. & mat. temperature
+
+        call get_init(zinitial, x_H0, x_He0, x0)
+
+        ! OK that's the initial conditions, now start computing our arrays
+        w0 = 1._dp / sqrt(1._dp + zinitial)       ! conformal-time-like initial zi
+        w1 = 1._dp / sqrt(1._dp + zfinal)         ! conformal-time-like final zf
+        logw0 = log(w0)                           ! log of w0
+        logw1 = log(w1)                           ! log of w1
+        hw = (logw1 - logw0) / real(Nz, kind=dp)  ! interval in log of conf time
+
+        ! Set up work-space stuff for dverk
+        ind = 1
+        nw  = 3
+        do i = 1, 24
+            cw(i) = 0._dp
+        end do
+
+        y(1) = x_H0   ! ionised fraction of H  - y(1) in R-K routine
+        y(2) = x_He0  ! ionised fraction of He - y(2) in R-K routine, (note that x_He=n_He+/n_He here and not n_He+/n_H)
+        y(3) = Tmat   ! matter temperature     - y(3) in R-K routine
+
+        do i = 1, Nz
+            ! calculate the start and end redshift for the interval at each z
+            ! or just at each z
+            z_old = zinitial + real(i-1, kind=dp) * (zfinal - zinitial) / real(Nz, kind=dp)
+            z_new = zinitial + real(i  , kind=dp) * (zfinal - zinitial) / real(Nz, kind=dp)
+
+            ! Use Saha to get x_e, using the equation for x_e for ionised helium
+            ! and for neutral helium.
+            ! Everyb_trip ionised above z=8000.  First ionization over by z=5000.
+            ! Assume He all singly ionised down to z=3500, then use He Saha until
+            ! He is 99% singly ionised, and *then* switch to joint H/He recombination.
+            if (z_new > 8000._dp) then  ! everything ionised: x_H0=1, x_He0=1
+                x_H0 = 1._dp
+                x_He0 = 1._dp
+                x0 = 1._dp + 2._dp * fHe
+                y(1) = x_H0
+                y(2) = x_He0
+                y(3) = Tnow * (1._dp + z_new)
+            else if (z_new > 5000._dp) then
+                x_H0 = 1._dp
+                x_He0 = 1._dp
+                rhs = exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_He2 / (Tnow * (1._dp + z_new))) / Nnow
+                rhs = rhs * 1._dp  ! ratio of g's is 1 for He++ <-> He+
+                x0 = 0.5_dp * (sqrt((rhs - 1._dp - fHe)**2 + (4._dp + 8._dp * fHe) * rhs) - (rhs - 1._dp - fHe))
+                y(1) = x_H0
+                y(2) = x_He0
+                y(3) = Tnow * (1._dp + z_new)
+            else if (z_new > 3500._dp) then
+                x_H0 = 1._dp
+                x_He0 = 1._dp
+                x0 = x_H0 + fHe * x_He0
+                y(1) = x_H0
+                y(2) = x_He0
+                y(3) = Tnow * (1._dp + z_new)
+            else if (y(2) > 0.99_dp) then
+                x_H0 = 1._dp
+                rhs = exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_He1 / (Tnow * (1._dp + z_new))) / Nnow
+                rhs = rhs * 4._dp      !ratio of g's is 4 for He+ <-> He0
+                x_He0 = 0.5_dp * (sqrt( (rhs - 1._dp)**2 + 4._dp * (1._dp + fHe) * rhs ) - (rhs - 1._dp))
+                x0 = x_He0
+                x_He0 = (x0 - 1._dp) / fHe
+                y(1) = x_H0
+                y(2) = x_He0
+                y(3) = Tnow * (1._dp + z_new)
+            else if (y(1) > 0.99_dp) then
+                rhs = exp(1.5_dp * log(CR * Tnow / (1._dp + z_new)) - CB1_H / (Tnow * (1._dp + z_new))) / Nnow
+                x_H0 = 0.5_dp * (sqrt( rhs**2 + 4._dp * rhs ) - rhs )
+                call dverk(nw, ion, z_old, y, z_new, tol, ind, cw, nw, w)
+                y(1) = x_H0
+                x0 = y(1) + fHe * y(2)
+            else
+                call dverk(nw, ion, z_old, y, z_new, tol, ind, cw, nw, w)
+                x0 = y(1) + fHe * y(2)
+            end if
+
+            Trad = Tnow * (1._dp + z_new)  ! Trad and Tmat are radiation and matter temperatures
+            x_H = y(1)   ! ionised fraction of H  - y(1) in R-K routine
+            x_He = y(2)  ! ionised fraction of He - y(2) in R-K routine, (note that x_He=n_He+/n_He here and not n_He+/n_H)
+            Tmat = y(3)  ! matter temperature     - y(3) in R-K routine
+
+            z_array(i) = z_new
+            x_array(i) = x0
+
+        end do
+    end subroutine recfast_fudgetest_func
 end module recfast_module
 
 
 !##############################################################################
 program recfast
     use precision, only : dp
-    use recfast_module, only : recfast_func
+    use recfast_module, only : recfast_func, recfast_fudgetest_func
     implicit none
 
 !   --- Arguments
@@ -460,7 +618,7 @@ program recfast
     character(len=80) :: fileout
 
     !   ###########################################################################
-    write(*,*)'recfast version 1.5'
+    write(*,*)'recfast version 1.7.0'
     write(*,*)'Using Hummer''s case B recombination rates for H'
     write(*,*)' with H fudge factor = 1.14 (or 1.125 plus high z fit),'
     write(*,*)' b_He fudge factor = 0.86,'
