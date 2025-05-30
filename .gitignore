@@ -1,5 +1,6 @@
-# Executable
+# Executable(s)
 recfast
+compare_lukas_douglas/recfast_tm
 
 # SLURM logs
 compare_lukas_douglas/debugging

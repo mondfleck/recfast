@@ -2,25 +2,34 @@ from pyrecfast import recfast_fudgetest as recfast1pt5
 import numpy as np
 import os
 
+DIR = "./data_recfast_1pt4_comparison"
+TMPIN = os.path.join(DIR, "tmp_recfast.in")
+TMPOUT = os.path.join(DIR, "tmp_recfast.out")
+RECFASTBIN = "recfast_tm"
+
+def setup():
+    if not os.path.exists(DIR):
+        os.system(f"mkdir {DIR}")
+
+    if not os.path.exists(f"./{RECFASTBIN}"):
+        assert(os.path.exists("./recfast_tm.f90"))
+        os.system(f"gfortran -o {RECFASTBIN} recfast_tm.f90")
+
 
 def recfast1pt4(Omega_B, Omega_DM, Omega_vac, H_0, T_0, Y_p, He_switch=6):
-    DIR = "./data_recfast_1pt4_comparison"
-    tmpin = os.path.join(DIR, "tmp_recfast.in")
-    tmpout = os.path.join(DIR, "tmp_recfast.out")
-    with open(tmpin, "x") as f:
-        f.write(f"{tmpout}\n")
+    with open(TMPIN, "x") as f:
+        f.write(f"{TMPOUT}\n")
         f.write(f"{Omega_B} {Omega_DM} {Omega_vac}\n")
         f.write(f"{H_0} {T_0} {Y_p}\n")
         f.write(f"{He_switch}")
-    os.system(f"./recfast_tm < {tmpin}")
-    os.remove(tmpin)
+    os.system(f"./{RECFASTBIN} < {TMPIN}")
+    os.remove(TMPIN)
 
-    array = np.genfromtxt(tmpout)
+    array = np.genfromtxt(TMPOUT)
     z = array[1:,0]
     x_e = array[1:,1]
-    os.remove(tmpout)
+    os.remove(TMPOUT)
     return z, x_e
-
 
 Omega_B, Omega_DM, Omega_vac = 0.04, 0.20, 0.76
 H_0, T_0, Y_p = 70, 2.725, 0.25
@@ -51,6 +60,7 @@ np.savetxt('recfast1.5_lukas.out', A, header=desc)
 
 
 ### douglas
+setup()
 Z = [0]
 desc = 'z'
 X_E = []
