@@ -511,7 +511,7 @@ program recfast
     character(len=80) :: fileout
 
     !   ###########################################################################
-    write(*,*)'recfast version 1.5'
+    write(*,*)'recfast version 1.7.0'
     write(*,*)'Using Hummer''s case B recombination rates for H'
     write(*,*)' with H fudge factor = 1.14 (or 1.125 plus high z fit),'
     write(*,*)' b_He fudge factor = 0.86,'
