@@ -5,16 +5,19 @@ import os
 DIR = "./data_recfast_1pt4_comparison"
 TMPIN = os.path.join(DIR, "tmp_recfast.in")
 TMPOUT = os.path.join(DIR, "tmp_recfast.out")
-RECFASTBIN = "recfast_tm"
+RECFASTBIN = "./recfast_tm"
 
 def setup():
     if not os.path.exists(DIR):
         os.system(f"mkdir {DIR}")
 
-    if not os.path.exists(f"./{RECFASTBIN}"):
+    if not os.path.exists(f"{RECFASTBIN}"):
         assert(os.path.exists("./recfast_tm.f90"))
         os.system(f"gfortran -o {RECFASTBIN} recfast_tm.f90")
 
+
+def takedown():
+    os.system(f"rm -r {DIR}")
 
 def recfast1pt4(Omega_B, Omega_DM, Omega_vac, H_0, T_0, Y_p, He_switch=6):
     with open(TMPIN, "x") as f:
@@ -22,7 +25,7 @@ def recfast1pt4(Omega_B, Omega_DM, Omega_vac, H_0, T_0, Y_p, He_switch=6):
         f.write(f"{Omega_B} {Omega_DM} {Omega_vac}\n")
         f.write(f"{H_0} {T_0} {Y_p}\n")
         f.write(f"{He_switch}")
-    os.system(f"./{RECFASTBIN} < {TMPIN}")
+    os.system(f"{RECFASTBIN} < {TMPIN}")
     os.remove(TMPIN)
 
     array = np.genfromtxt(TMPOUT)
@@ -72,3 +75,5 @@ for he in douglas_He:
 
 A = np.stack(Z + X_E, axis=1)
 np.savetxt('recfast1.4_douglas.out', A, header=desc)
+
+takedown()
