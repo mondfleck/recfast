@@ -571,7 +571,7 @@ program recfast
     open(unit=7, status='new', form='formatted', file=fileout)
     write(7, '(''#'', 1x,''z'', 2x, ''x_e'', 3x, ''flag'')')
     do i = 1, Nz
-        write(7, '(f9.2,2x,e24.18)') z_array(i), x_array(i), flag_array(i)
+        write(7, '(f9.2,2x,e24.18,2x,i2)') z_array(i), x_array(i), flag_array(i)
     end do
 
 end program recfast
