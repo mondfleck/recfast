@@ -703,15 +703,9 @@ program recfast
 !   --- Timer 
     type(timer) :: clock
     !   ###########################################################################
-    call say_hello()
-    clock = timer()
-    call clock%tic()
-    write(*,*)'recfast version 1.7.0'
-    write(*,*)'Using Hummer''s case B recombination rates for H'
-    write(*,*)' with H fudge factor = 1.14 (or 1.125 plus high z fit),'
-    write(*,*)' b_He fudge factor = 0.86,'
-    write(*,*)' and a fit to tabulated HeII singlet recombination rates'
-    write(*,*)
+    !call say_hello()
+    !clock = timer()
+    !call clock%tic()
 
     ! These are easy to inquire as input, but let's use simple values
     zinitial = 1.e4_dp
@@ -719,41 +713,19 @@ program recfast
     tol = 1.e-5_dp  ! tolerance for R-K
     ! will output every 10 in z, but this is easily changed also
 
-    write(*,*) 'Enter output file name'
     read(*,'(a)') fileout
 
-    write(*,*) 'Enter Omega_B, Omega_DM, Omega_vac (e.g. 0.04 0.20 0.76)'
     read(*,*) OmegaB, OmegaC, OmegaL
-    !write(*,'(1x,''Omega_K = '',f4.2)') OmegaK
-    write(*,*)
-    write(*,*) 'Enter H_0 (in km/s/Mpc), T_0, Y_p (e.g. 70 2.725 0.25)'
     read(*,*) H0_in, Tnow, Yp
 
     ! Modification for H correction (Hswitch):
-    write(*,*) 'Modification for H recombination:'
-    write(*,*) '0) no change from old Recfast'
-    write(*,*) '1) include correction'
-    write(*,*) 'Enter the choice of modification for H (0-1):'
     read(*,*) Hswitch_in
 
     ! Modification for HeI recombination (Heswitch):
-    write(*,*) 'Modification for HeI recombination:'
-    write(*,*) '0) no change from old Recfast'
-    write(*,*) '1) full expression for escape probability for singlet'
-    write(*,*) '   1P-1S transition'
-    write(*,*) '2) also including effect of contiuum opacity of H on HeI'
-    write(*,*) '   singlet (based in fitting formula suggested by'
-    write(*,*) '   Kholupenko, Ivanchik & Varshalovich, 2007)'
-    write(*,*) '3) only including recombination through the triplets'
-    write(*,*) '4) including 3 and the effect of the contiuum '
-    write(*,*) '   (although this is probably negligible)'
-    write(*,*) '5) including only 1, 2 and 3'
-    write(*,*) '6) including all of 1 to 4'
-    write(*,*) 'Enter the choice of modification for HeI (0-6):'
     read(*,*) Heswitch_in
 
-    call clock%toc()
-    call clock%print()
+    ! call clock%toc()
+    ! call clock%print()
 
     ! OK that's the initial conditions, now start writing output file
     call recfast_func(OmegaB, OmegaC, OmegaL, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, &
