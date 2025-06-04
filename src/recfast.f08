@@ -463,6 +463,10 @@ program recfast
     real(dp) :: z_array(Nz)  ! array of redshifts written to file in the end
     real(dp) :: x_array(Nz)  ! array of ionised fraction written to file in the end
 
+    real(dp) :: xH_array(Nz)  ! array of hydrogen fraction written to file in the end
+    real(dp) :: xHe_array(Nz)  ! array of helium fraction written to file in the end
+    real(dp) :: Tmat_array(Nz)  ! array of matter temp written to file in the end
+
     character(len=80) :: fileout
 
     !   ###########################################################################
@@ -514,12 +518,12 @@ program recfast
 
     ! OK that's the initial conditions, now start writing output file
     call recfast_func(OmegaB, OmegaC, OmegaL, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, &
-                      zinitial, zfinal, tol, Nz, z_array, x_array)
+                      zinitial, zfinal, tol, Nz, z_array, x_array, xH_array, xHe_array, Tmat_array)
 
     open(unit=7, status='new', form='formatted', file=fileout)
     write(7, '(''#'', 1x,''z'', 2x, ''x_e'')')
     do i = 1, Nz
-        write(7, '(f9.2,2x,e24.18)') z_array(i), x_array(i)
+        write(7, '(f9.2,2x,e24.18,2x,e24.18,2x,e24.18,2x,e24.18)') z_array(i), x_array(i), xH_array(i), xHe_array(i), Tmat_array(i)
     end do
 
 end program recfast
