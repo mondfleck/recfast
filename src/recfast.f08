@@ -305,7 +305,7 @@ module recfast_module
     contains
 
     subroutine recfast_func(OmegaB, OmegaC, OmegaL_in, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, &
-                            zinitial, zfinal, tol, Nz, z_array, x_array)
+                            zinitial, zfinal, tol, Nz, z_array, x_array, xH_array, xHe_array, Tmat_array)
         integer,  intent(in) :: Nz           ! number of output redshitf (integer)
         integer,  intent(in) :: Hswitch_in
         integer,  intent(in) :: Heswitch_in
@@ -320,6 +320,9 @@ module recfast_module
         real(dp), intent(in) :: tol       ! tolerance for the integrator
         real(dp), intent(out) :: z_array(Nz)
         real(dp), intent(out) :: x_array(Nz)
+        real(dp), intent(out) :: xH_array(Nz)
+        real(dp), intent(out) :: xHe_array(Nz)
+        real(dp), intent(out) :: Tmat_array(Nz)
 
         integer, parameter :: Ndim = 3  ! number of d.e.'s to solve (integer)
 
@@ -432,6 +435,9 @@ module recfast_module
 
             z_array(i) = z_new
             x_array(i) = x0
+            xH_array(i) = x_H
+            xHe_array(i) = x_He
+            Tmat_array(i) = Tmat
 
         end do
     end subroutine recfast_func
