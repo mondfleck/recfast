@@ -107,6 +107,9 @@ def recfast(double Omega_b,
     cdef:
         ndarray[double, mode="c"] z_array = np.empty(Nz, dtype=np.double)
         ndarray[double, mode="c"] x_array = np.empty(Nz, dtype=np.double)
+        ndarray[double, mode="c"] xH_array = np.empty(Nz, dtype=np.double)
+        ndarray[double, mode="c"] xHe_array = np.empty(Nz, dtype=np.double)
+        ndarray[double, mode="c"] Tmat_array = np.empty(Nz, dtype=np.double)
     recfast_c(&Omega_b,
               &Omega_c,
               &Omega_L,
@@ -120,5 +123,8 @@ def recfast(double Omega_b,
               &tol,
               &Nz,
               &z_array[0],
-              &x_array[0])
+              &x_array[0],
+              &xH_array,
+              &xHe_array,
+              &Tmat_array)
     return z_array, x_array
