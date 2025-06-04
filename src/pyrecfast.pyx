@@ -15,7 +15,10 @@ cdef extern:
                    double *tol,
                    int *Nz,
                    double *z_array,
-                   double *x_array)
+                   double *x_array,
+                   double *xH_array,
+                   double *xHe_array,
+                   double *Tmat_array)
 
 def recfast(double Omega_b,
             double Omega_c,
@@ -124,7 +127,7 @@ def recfast(double Omega_b,
               &Nz,
               &z_array[0],
               &x_array[0],
-              &xH_array,
-              &xHe_array,
-              &Tmat_array)
+              &xH_array[0],
+              &xHe_array[0],
+              &Tmat_array[0])
     return z_array, x_array
