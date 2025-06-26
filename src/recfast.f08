@@ -210,6 +210,9 @@ module fudgefit
     real(dp) :: fu        ! fu is a "fudge factor" for H, to approximate low z behaviour
     real(dp) :: b_He      ! b_He is a "fudge factor" for HeI, to approximate higher z behaviour
 
+    integer(dp), parameter :: Nfudge = 10
+    real(dp) :: fudges(Nfudge)
+
     contains
 
     subroutine set_switch(Hswitch_in, Heswitch_in)
@@ -233,6 +236,12 @@ module fudgefit
         !endif
         b_He = 0.86
     end subroutine set_switch
+
+    subroutine set_fudges(fudges_in)
+        real(dp), intent(in) :: fudges_in(Nfudge)
+        fudges = fudges_in
+    end subroutine set_fudges
+    
 end module fudgefit
 
 
@@ -448,6 +457,7 @@ end module recfast_module
 program recfast
     use precision, only : dp
     use recfast_module, only : recfast_func
+    use fudgefit, only: Nfudge, set_fudges, fudgefit_fudges => fudges
     implicit none
 
 !   --- Arguments
@@ -466,6 +476,8 @@ program recfast
     real(dp) :: xH_array(Nz)  ! array of hydrogen fraction written to file in the end
     real(dp) :: xHe_array(Nz)  ! array of helium fraction written to file in the end
     real(dp) :: Tmat_array(Nz)  ! array of matter temp written to file in the end
+
+    real(dp) :: fudges(Nfudge)
 
     character(len=80) :: fileout
 
@@ -515,6 +527,15 @@ program recfast
     write(*,*) '6) including all of 1 to 4'
     write(*,*) 'Enter the choice of modification for HeI (0-6):'
     read(*,*) Heswitch_in
+
+    character(len=20) :: Nfudge_str
+    write(Nfudge_str, '(I0)') Nfudge
+    write(*,*) 'Set of fudge values (' // Nfudge_str // 'numbers)'
+    read(*,*) fudges
+
+    call set_fudges(fudges)
+
+    write(*,*) "Fudge contents:", fudgefit_fudges
 
     ! OK that's the initial conditions, now start writing output file
     call recfast_func(OmegaB, OmegaC, OmegaL, H0_in, Tnow, Yp, Hswitch_in, Heswitch_in, &
