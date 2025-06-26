@@ -480,6 +480,7 @@ program recfast
     real(dp) :: fudges(Nfudge)
 
     character(len=80) :: fileout
+    character(len=20) :: Nfudge_str
 
     !   ###########################################################################
     write(*,*)'recfast version 1.7.0'
@@ -528,7 +529,6 @@ program recfast
     write(*,*) 'Enter the choice of modification for HeI (0-6):'
     read(*,*) Heswitch_in
 
-    character(len=20) :: Nfudge_str
     write(Nfudge_str, '(I0)') Nfudge
     write(*,*) 'Set of fudge values (' // Nfudge_str // 'numbers)'
     read(*,*) fudges
