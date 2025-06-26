@@ -530,7 +530,7 @@ program recfast
     read(*,*) Heswitch_in
 
     write(Nfudge_str, '(I0)') Nfudge
-    write(*,*) 'Set of fudge values (' // Nfudge_str // 'numbers)'
+    write(*,*) 'Set of fudge values (' // Nfudge_str // ' numbers)'
     read(*,*) fudges
 
     call set_fudges(fudges)
