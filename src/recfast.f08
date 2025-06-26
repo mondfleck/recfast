@@ -480,7 +480,7 @@ program recfast
     real(dp) :: fudges(Nfudge)
 
     character(len=80) :: fileout
-    character(len=20) :: Nfudge_str
+    character(len=2) :: Nfudge_str
 
     !   ###########################################################################
     write(*,*)'recfast version 1.7.0'
