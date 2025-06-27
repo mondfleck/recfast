@@ -34,7 +34,7 @@ if __name__ == "__main__":
             fudges[file] = str(value)
             generate_file(
                 directory=".",
-                filename=f"f{file}_{value}.int",
+                filename=f"f{file}_{value}.in",
                 content_template=
                     f"f{file}_{value}.out\n"+
                     "0.04 0.20 0.76\n"+
