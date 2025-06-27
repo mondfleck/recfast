@@ -32,9 +32,10 @@ if __name__ == "__main__":
             defaults = ["1.0"] * num
             fudges = defaults
             fudges[file] = str(value)
+            filename = f"f{file}_{value}.in"
             generate_file(
                 directory=".",
-                filename=f"f{file}_{value}.in",
+                filename=filename,
                 content_template=
                     f"f{file}_{value}.out\n"+
                     "0.04 0.20 0.76\n"+
@@ -43,3 +44,4 @@ if __name__ == "__main__":
                     "6\n"+
                     " ".join(fudges)
             )
+            os.system(f"./recfast < {filename}")
