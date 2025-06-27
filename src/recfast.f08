@@ -602,6 +602,7 @@ subroutine ion(Ndim, z, y, f)
     use constants, only : CDB_H, CDB_He, CR, CK_H, CK_He, CL_H, CL_He, CT, Bfact
     use fudgefit, only : AGauss1, AGauss2, zGauss1, zGauss2, wGauss1, wGauss2
     use fudgefit, only : H_frac, Hswitch, Heswitch, fu, b_He
+    use fudgefit, only : fudges
     use input, only : OmegaL, OmegaM, OmegaK, H0, Tnow, Nnow, fHe, z_eq
     implicit none
 
@@ -759,15 +760,15 @@ subroutine ion(Ndim, z, y, f)
         f(1) = 0._dp
     !else if ((x_H > 0.98_dp) .and. (Heflag == 0)) then    !don't modify
     else if (x_H > 0.985_dp) then     !use Saha rate for Hydrogen
-        f(1) = (x * x_H * nd_H * Rdown - Rup * (1._dp - x_H) * exp(-CL_H / Tmat)) / (Hz * (1._dp + z))
+        f(1) = fudges(8) * (x * x_H * nd_H * Rdown * fudges(9) - fudges(10) * Rup * (1._dp - x_H) * exp(-CL_H / Tmat)) / (Hz * (1._dp + z))
         ! for interest, calculate the correction factor compared to Saha
         ! (without the fudge)
         factor = (1._dp + K * Lambda_H * nd_H * (1._dp - x_H)) &
                  / (Hz * (1._dp + z) * (1._dp + K * Lambda_H * nd_H * (1._dp - x) + K * Rup * nd_H * (1._dp - x)))
     else                  !use full rate for H
-        f(1) = ((x * x_H * nd_H * Rdown - Rup * (1._dp - x_H) * exp(-CL_H / Tmat)) &
-                * (1._dp + K * Lambda_H * nd_H * (1._dp - x_H))) &
-               / (Hz * (1._dp+z) * (1._dp/fu + K * Lambda_H * nd_H * (1._dp-x_H) / fu + K * Rup * nd_H * (1._dp-x_H)))
+        f(1) = fudges(1) * ((x * x_H * nd_H * Rdown * fudges(2) - fudges(3) * Rup * (1._dp - x_H) * exp(-CL_H / Tmat)) &
+                * (1._dp + fudges(4) * K * Lambda_H * nd_H * (1._dp - x_H))) &
+               / (Hz * (1._dp+z) * (1._dp/fu * fudges(5) + fudges(6) * K * Lambda_H * nd_H * (1._dp-x_H) / fu + fudges(7) * K * Rup * nd_H * (1._dp-x_H)))
     end if
     ! turn off the He once it is small
     if (x_He < 1.e-15_dp) then
